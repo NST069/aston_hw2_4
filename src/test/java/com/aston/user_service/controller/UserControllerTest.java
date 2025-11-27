@@ -2,7 +2,6 @@ package com.aston.user_service.controller;
 
 import com.aston.user_service.exception.UserNotFoundException;
 import com.aston.user_service.mapper.UserDTO;
-import com.aston.user_service.model.User;
 import com.aston.user_service.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -59,13 +58,7 @@ class UserControllerTest {
         UserDTO userDTO = new UserDTO(1, "test", "test@mail.ru", 30);
         String json = objectMapper.writeValueAsString(userDTO);
 
-        User savedUser = new User();
-        savedUser.setId(1);
-        savedUser.setName("test");
-        savedUser.setEmail("test@mail.ru");
-        savedUser.setAge(30);
-
-        given(this.userService.createUser(Mockito.any(User.class))).willReturn(savedUser);
+        given(this.userService.createUser(Mockito.any(UserDTO.class))).willReturn(userDTO);
 
         this.mockMvc.perform(post("/api/v1/users")
                         .contentType(MediaType.APPLICATION_JSON).content(json)
@@ -97,13 +90,9 @@ class UserControllerTest {
 
     @Test
     void getUserById_ExistingUser_ShouldReturnUser() throws Exception {
-        User user = new User();
-        user.setId(1);
-        user.setName("test1");
-        user.setEmail("test1@mail.ru");
-        user.setAge(30);
+        UserDTO userDTO = new UserDTO(1, "test", "test1@mail.ru", 30);
 
-        given(this.userService.findUserById("1")).willReturn(user);
+        given(this.userService.findUserById("1")).willReturn(userDTO);
 
         this.mockMvc.perform(get("/api/v1/users/1")
                         .accept(MediaType.APPLICATION_JSON))
@@ -130,16 +119,11 @@ class UserControllerTest {
 
     @Test
     void updateUser_ExistingUser_ShouldUpdateUser() throws Exception {
-        User updatedUser = new User();
-        updatedUser.setId(1);
-        updatedUser.setName("test2");
-        updatedUser.setEmail("test2@mail.ru");
-        updatedUser.setAge(20);
-
+        UserDTO updatedUserDTO = new UserDTO(1, "test2", "test2@mail.ru", 20);
         UserDTO userDTO = new UserDTO(1, "test", "test@mail.ru", 30);
         String json = objectMapper.writeValueAsString(userDTO);
 
-        given(this.userService.updateUser(eq("1"), Mockito.any(User.class))).willReturn(updatedUser);
+        given(this.userService.updateUser(eq("1"), Mockito.any(UserDTO.class))).willReturn(updatedUserDTO);
 
         this.mockMvc.perform(put("/api/v1/users/1")
                         .contentType(MediaType.APPLICATION_JSON).content(json)
@@ -159,7 +143,7 @@ class UserControllerTest {
         UserDTO userDTO = new UserDTO(1, "test", "test@mail.ru", 30);
         String json = objectMapper.writeValueAsString(userDTO);
 
-        given(this.userService.updateUser(eq("1"), Mockito.any(User.class))).willThrow(new UserNotFoundException("1"));
+        given(this.userService.updateUser(eq("1"), Mockito.any(UserDTO.class))).willThrow(new UserNotFoundException("1"));
 
         this.mockMvc.perform(put("/api/v1/users/1")
                         .contentType(MediaType.APPLICATION_JSON).content(json)

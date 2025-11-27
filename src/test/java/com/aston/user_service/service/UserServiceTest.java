@@ -1,6 +1,7 @@
 package com.aston.user_service.service;
 
 import com.aston.user_service.exception.UserNotFoundException;
+import com.aston.user_service.mapper.UserDTO;
 import com.aston.user_service.model.User;
 import com.aston.user_service.repository.UserJPARepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,17 +57,19 @@ class UserServiceTest {
         newUser.setName("test");
         newUser.setEmail("test@mail.ru");
         newUser.setAge(30);
+        UserDTO newUserDTO = new UserDTO(1, "test", "test@mail.ru", 30);
 
-        given(userJPARepository.save(newUser)).willReturn(newUser);
+        given(userJPARepository.findByEmail("test@mail.ru")).willReturn(Optional.empty());
+        given(userJPARepository.save(Mockito.any(User.class))).willReturn(newUser);
 
-        User result = userService.createUser(newUser);
+        UserDTO result = userService.createUser(newUserDTO);
 
-        assertThat(result.getId()).isEqualTo(newUser.getId());
-        assertThat(result.getName()).isEqualTo(newUser.getName());
-        assertThat(result.getEmail()).isEqualTo(newUser.getEmail());
-        assertThat(result.getAge()).isEqualTo(newUser.getAge());
+        assertThat(result.id()).isEqualTo(newUser.getId());
+        assertThat(result.name()).isEqualTo(newUser.getName());
+        assertThat(result.email()).isEqualTo(newUser.getEmail());
+        assertThat(result.age()).isEqualTo(newUser.getAge());
 
-        verify(userJPARepository, times(1)).save(newUser);
+        verify(userJPARepository, times(1)).save(Mockito.any(User.class));
     }
 
     @Test
@@ -79,12 +82,12 @@ class UserServiceTest {
 
         given(userJPARepository.findById("1")).willReturn(Optional.of(user));
 
-        User result = userService.findUserById("1");
+        UserDTO result = userService.findUserById("1");
 
-        assertThat(result.getId()).isEqualTo(user.getId());
-        assertThat(result.getName()).isEqualTo(user.getName());
-        assertThat(result.getEmail()).isEqualTo(user.getEmail());
-        assertThat(result.getAge()).isEqualTo(user.getAge());
+        assertThat(result.id()).isEqualTo(user.getId());
+        assertThat(result.name()).isEqualTo(user.getName());
+        assertThat(result.email()).isEqualTo(user.getEmail());
+        assertThat(result.age()).isEqualTo(user.getAge());
     }
 
     @Test
@@ -111,15 +114,16 @@ class UserServiceTest {
         update.setName("test2");
         update.setEmail("test@mail.ru");
         update.setAge(31);
+        UserDTO updateDTO = new UserDTO(1, "test2", "test@mail.ru", 31);
 
         given(userJPARepository.findById("1")).willReturn(Optional.of(oldUser));
         given(userJPARepository.save(oldUser)).willReturn(oldUser);
 
-        User result = userService.updateUser("1", update);
+        UserDTO result = userService.updateUser("1", updateDTO);
 
-        assertThat(result.getId()).isEqualTo(update.getId());
-        assertThat(result.getName()).isEqualTo(update.getName());
-        assertThat(result.getAge()).isEqualTo(update.getAge());
+        assertThat(result.id()).isEqualTo(update.getId());
+        assertThat(result.name()).isEqualTo(update.getName());
+        assertThat(result.age()).isEqualTo(update.getAge());
 
         verify(userJPARepository, times(1)).findById("1");
         verify(userJPARepository, times(1)).save(oldUser);
@@ -127,15 +131,12 @@ class UserServiceTest {
 
     @Test
     void updateUser_NonExistingUser_ShouldThrowException() {
-        User update = new User();
-        update.setName("test2");
-        update.setEmail("test@mail.ru");
-        update.setAge(31);
+        UserDTO updateDTO = new UserDTO(1, "test2", "test@mail.ru", 31);
 
         given(userJPARepository.findById("1")).willReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> {
-            userService.updateUser("1", update);
+            userService.updateUser("1", updateDTO);
         });
 
         verify(userJPARepository, times(1)).findById("1");

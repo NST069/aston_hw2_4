@@ -1,9 +1,6 @@
 package com.aston.user_service.controller;
 
 import com.aston.user_service.mapper.UserDTO;
-import com.aston.user_service.mapper.UserDTOToUserConverter;
-import com.aston.user_service.mapper.UserToUserDTOConverter;
-import com.aston.user_service.model.User;
 import com.aston.user_service.service.UserService;
 import com.aston.user_service.util.Result;
 import jakarta.validation.Valid;
@@ -20,22 +17,15 @@ public class UserController {
 
     private final UserService userService;
 
-    private final UserToUserDTOConverter userToUserDTOConverter;
 
-    private final UserDTOToUserConverter userDTOToUserConverter;
-
-    public UserController(UserService userService, UserToUserDTOConverter userToUserDTOConverter, UserDTOToUserConverter userDTOToUserConverter) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.userToUserDTOConverter = userToUserDTOConverter;
-        this.userDTOToUserConverter = userDTOToUserConverter;
     }
 
     @PostMapping
     public Result addUser(@Valid @RequestBody UserDTO userDTO) {
         logger.debug("Создание пользователя: {}", userDTO);
-        User newUser = this.userDTOToUserConverter.convert(userDTO);
-        User savedUser = this.userService.createUser(newUser);
-        UserDTO savedUserDTO = this.userToUserDTOConverter.convert(savedUser);
+        UserDTO savedUserDTO = this.userService.createUser(userDTO);
         logger.debug("Пользователь добавлен успешно");
         return new Result(true, HttpStatus.OK.value(), "Пользователь добавлен успешно", savedUserDTO);
     }
@@ -43,8 +33,7 @@ public class UserController {
     @GetMapping("/{userId}")
     public Result getUserById(@PathVariable String userId) {
         logger.debug("Поиск пользователя по Id {}", userId);
-        User foundUser = this.userService.findUserById(userId);
-        UserDTO foundUserDTO = this.userToUserDTOConverter.convert(foundUser);
+        UserDTO foundUserDTO = this.userService.findUserById(userId);
         logger.debug("Пользователь найден успешно");
         return new Result(true, HttpStatus.OK.value(), "Пользователь найден успешно", foundUserDTO);
     }
@@ -52,9 +41,7 @@ public class UserController {
     @PutMapping("/{userId}")
     public Result updateUser(@PathVariable String userId, @Valid @RequestBody UserDTO userDTO) {
         logger.debug("Обновление пользователя: id={}", userId);
-        User update = this.userDTOToUserConverter.convert(userDTO);
-        User updatedUser = this.userService.updateUser(userId, update);
-        UserDTO updatedUserDTO = this.userToUserDTOConverter.convert(updatedUser);
+        UserDTO updatedUserDTO = this.userService.updateUser(userId, userDTO);
         logger.debug("Пользователь обновлен успешно");
         return new Result(true, HttpStatus.OK.value(), "Пользователь обновлен успешно", updatedUserDTO);
     }
