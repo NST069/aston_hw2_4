@@ -28,8 +28,6 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
     networks:
       - app-network
 
@@ -37,8 +35,6 @@ services:
     image: confluentinc/cp-kafka:7.4.0
     depends_on:
       - zookeeper
-    ports:
-      - "9092:9092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -128,6 +124,12 @@ services:
 
 volumes:
   postgres_data:
+  maven-repo:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${USERPROFILE}\.m2\repository
 
 networks:
   app-network:
