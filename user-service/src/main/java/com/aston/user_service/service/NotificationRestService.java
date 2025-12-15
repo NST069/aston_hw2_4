@@ -1,6 +1,8 @@
 package com.aston.user_service.service;
 
 import com.aston.user_service.mapper.EmailDTO;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -12,10 +14,12 @@ import org.springframework.web.client.RestTemplate;
 @Service
 @ConditionalOnProperty(name = "notification.service", havingValue = "rest", matchIfMissing = false)
 @RequiredArgsConstructor
-public class NotificationRestService implements NotificationService{
+public class NotificationRestService implements NotificationService {
 
     private final RestTemplate restTemplate;
 
+    @CircuitBreaker(name = "notification-service")
+    @Retry(name = "notification-service")
     public boolean sendEmailToNotificationService(EmailDTO emailDTO) {
         String url = "http://notification-service:8080/api/v1/notifications/sendEmail";
 
