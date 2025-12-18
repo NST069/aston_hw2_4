@@ -11,11 +11,15 @@ spring:
         - id: user-service
           uri: lb://user-service
           predicates:
-            - Path=/api/v1/users/**
+            - Path=/users/**
+          filters:
+            - RewritePath=/users/(?<segment>.*), /api/v1/users/$\{segment}
         - id: notification-service
           uri: lb://notification-service
           predicates:
-            - Path=/api/v1/notifications/**
+            - Path=/notifications/**
+          filters:
+            - RewritePath=/notifications/(?<segment>.*), /api/v1/notifications/$\{segment}
 
 server:
   port: 3000
@@ -23,3 +27,9 @@ eureka:
   client:
     service-url:
       defaultZone: http://discovery-service:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+    registry-fetch-interval-seconds: 5
+  instance:
+    hostname: gateway-service
+    prefer-ip-address: false

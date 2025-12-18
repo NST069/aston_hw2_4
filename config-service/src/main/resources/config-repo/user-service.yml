@@ -49,6 +49,12 @@ eureka:
   client:
     service-url:
       defaultZone: http://discovery-service:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+    registry-fetch-interval-seconds: 5
+  instance:
+    hostname: user-service
+    prefer-ip-address: false
 
 logging:
   level:
